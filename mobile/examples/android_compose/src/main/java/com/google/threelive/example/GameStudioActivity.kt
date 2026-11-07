@@ -90,11 +90,16 @@ private fun GameStudioScreen(onRenderer: (ThreeLiveFilamentRenderer) -> Unit) {
     val source = sceneCode(parts)
     scope.launch {
       try {
-        val glb = withContext(Dispatchers.Default) {
-          ThreeCompiler.compile(source).use { it.toByteArray() }
+        val compiled = withContext(Dispatchers.Default) {
+          ThreeCompiler.compile(source)
         }
-        renderer.load(java.nio.ByteBuffer.allocateDirect(glb.size).apply { put(glb); flip() })
-        message = "3D scene ready • ${parts.size} object(s)"
+        try {
+          // Keep the GLB owner alive until the renderer has synchronously consumed its buffer.
+          renderer.load(compiled.byteBuffer.duplicate())
+          message = "3D scene ready • ${parts.size} object(s)"
+        } finally {
+          compiled.close()
+        }
       } catch (e: Exception) {
         message = "Build error: ${e.localizedMessage ?: "unknown error"}"
       } finally { busy = false }
