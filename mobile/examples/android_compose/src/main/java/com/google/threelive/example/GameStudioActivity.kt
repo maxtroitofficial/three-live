@@ -67,7 +67,7 @@ const hemi = new THREE.HemisphereLight(0xffffff,0x657080,2.2); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffffff,2.5); sun.position.set(5,9,6); scene.add(sun);
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(18,18),new THREE.MeshStandardMaterial({color:0x648b62})); ground.rotation.x=-Math.PI/2; scene.add(ground);
 const road = new THREE.Mesh(new THREE.BoxGeometry(18,.04,2.2),new THREE.MeshStandardMaterial({color:0x343b49})); road.position.set(0,.02,-3); scene.add(road);
-${parts.join("\n")}
+${parts.joinToString("\n")}
 """.trimIndent()
 
 @OptIn(ExperimentalMaterial3Api::class)
