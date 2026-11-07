@@ -93,7 +93,7 @@ private fun GameStudioScreen(onRenderer: (ThreeLiveFilamentRenderer) -> Unit) {
         val glb = withContext(Dispatchers.Default) {
           ThreeCompiler.compile(source).use { it.toByteArray() }
         }
-        renderer.load(java.nio.ByteBuffer.wrap(glb))
+        renderer.load(java.nio.ByteBuffer.allocateDirect(glb.size).apply { put(glb); flip() })
         message = "3D scene ready • ${parts.size} object(s)"
       } catch (e: Exception) {
         message = "Build error: ${e.localizedMessage ?: "unknown error"}"
