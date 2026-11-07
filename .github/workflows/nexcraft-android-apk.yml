@@ -33,13 +33,13 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Build release APK
-        run: gradle :mobile:examples:android_compose:assembleRelease --stacktrace
+      - name: Build signed installable debug APK
+        run: gradle :mobile:examples:android_compose:assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: NEXCRAFT-3D-Studio-APK
-          path: mobile/examples/android_compose/build/outputs/apk/release/*.apk
+          path: mobile/examples/android_compose/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
