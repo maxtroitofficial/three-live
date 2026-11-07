@@ -31,6 +31,7 @@ import com.google.threelive.filament.ThreeLiveFilamentRenderer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 
 private val StudioBg = Color(0xFF0B1020)
 private val StudioPanel = Color(0xFF151D31)
@@ -145,13 +146,29 @@ private fun GameStudioScreen(onRenderer: (ThreeLiveFilamentRenderer) -> Unit) {
         Spacer(Modifier.height(8.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
           Button(onClick = { build() }, enabled = !busy, modifier = Modifier.weight(1f)) { Text(if (busy) "Building…" else "▶ Build 3D Scene") }
-          OutlinedButton(onClick = { prefs.edit().putString("scene", sceneCode(parts)).apply(); message = "Project saved on this phone." }) { Text("Save") }
+          OutlinedButton(onClick = {
+            val data = JSONArray()
+            parts.forEach { data.put(it) }
+            prefs.edit().putString("items", data.toString()).putString("template", template).apply()
+            message = "Project saved on this phone."
+          }) { Text("Save") }
         }
         Row {
           TextButton(onClick = {
-            val saved = prefs.getString("scene", null)
-            message = if (saved == null) "No saved project yet." else "Saved project exists on this phone."
-          }) { Text("Check Save") }
+            val saved = prefs.getString("items", null)
+            if (saved == null) {
+              message = "No saved project yet."
+            } else {
+              try {
+                val data = JSONArray(saved)
+                parts = (0 until data.length()).map { data.getString(it) }
+                template = prefs.getString("template", "Custom") ?: "Custom"
+                message = "Project loaded • ${parts.size} object(s). Tap Build."
+              } catch (e: Exception) {
+                message = "Saved project could not be read."
+              }
+            }
+          }) { Text("Load Project") }
           TextButton(onClick = {
             val intent = Intent(Intent.ACTION_SEND).apply {
               type = "text/plain"; putExtra(Intent.EXTRA_SUBJECT, "My 3D scene"); putExtra(Intent.EXTRA_TEXT, sceneCode(parts))
